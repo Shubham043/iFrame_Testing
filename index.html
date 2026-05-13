@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Iframe Test Lab | Embed Sandbox</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      padding: 24px 20px;
+      color: #0f172a;
+    }
+
+    .test-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* header area */
+    .test-header {
+      background: white;
+      border-radius: 28px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    h1 {
+      margin: 0 0 0.25rem 0;
+      font-weight: 600;
+      font-size: 1.9rem;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #1e293b, #3b82f6);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subhead {
+      color: #334155;
+      margin-top: 6px;
+      border-left: 3px solid #3b82f6;
+      padding-left: 14px;
+      font-weight: 400;
+    }
+
+    /* control panel */
+    .control-panel {
+      background: white;
+      border-radius: 24px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      transition: all 0.2s;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .url-field {
+      flex: 4;
+      min-width: 220px;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    input, select, button {
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      transition: 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+
+    .url-input {
+      width: 100%;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #f8fafc;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button.primary {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: white;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    button.primary:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
+
+    button.danger {
+      background: #fff5f5;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    button.danger:hover {
+      background: #fee2e2;
+      border-color: #f87171;
+    }
+
+    button:hover {
+      background: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    .size-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      margin-top: 12px;
+      border-top: 1px solid #eef2ff;
+      padding-top: 18px;
+    }
+
+    .size-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .size-control span {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    select#presetSizes {
+      width: 140px;
+      background-color: #ffffff;
+    }
+
+    .badge {
+      background: #eef2ff;
+      padding: 6px 12px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #1e40af;
+    }
+
+    /* iframe showcase */
+    .iframe-stage {
+      background: #ffffff;
+      border-radius: 28px;
+      border: 1px solid #e2edff;
+      overflow: hidden;
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+
+    .iframe-header {
+      background: #f9fafb;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .iframe-header h3 {
+      margin: 0;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status {
+      font-family: monospace;
+      font-size: 0.8rem;
+      background: #eef2ff;
+      padding: 4px 10px;
+      border-radius: 40px;
+      color: #075985;
+    }
+
+    .iframe-wrapper {
+      background: #fefce8;
+      background-image: radial-gradient(circle at 10% 20%, rgba(0,0,0,0.02) 2%, transparent 2.5%);
+      background-size: 24px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    iframe {
+      display: block;
+      border: none;
+      width: 100%;
+      background: white;
+      transition: all 0.2s ease;
+      resize: both;
+      overflow: auto;
+    }
+
+    .info-note {
+      background: #fef9e3;
+      border-radius: 20px;
+      padding: 14px 20px;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #854d0e;
+      border-left: 5px solid #eab308;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: baseline;
+    }
+
+    .code-snippet {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 8px 14px;
+      border-radius: 16px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #5b6e8c;
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 16px;
+      }
+      .control-panel, .test-header {
+        padding: 1rem;
+      }
+      .size-options {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="test-container">
+  <div class="test-header">
+    <h1>🖼️ iframe playground</h1>
+    <div class="subhead">Test embedding any website — observe cross-origin limits, sandbox behavior & responsive sizing</div>
+  </div>
+
+  <div class="control-panel">
+    <div class="input-group">
+      <div class="url-field">
+        <label>🌐 Target URL</label>
+        <input type="text" id="urlInput" class="url-input" placeholder="https://example.com , https://en.wikipedia.org/wiki/Main_Page , or any public URL" value="https://example.com">
+      </div>
+      <div class="button-group">
+        <button id="loadBtn" class="primary">⏎ Load iframe</button>
+        <button id="resetBtn">⟳ Reset to example.com</button>
+        <button id="clearBtn" class="danger">🗑️ Clear src</button>
+      </div>
+    </div>
+
+    <div class="size-options">
+      <div class="size-control">
+        <span>📐 Width:</span>
+        <input type="range" id="widthSlider" min="200" max="1200" step="10" value="100%" style="width: 160px;">
+        <span id="widthValue" class="badge">100%</span>
+      </div>
+      <div class="size-control">
+        <span>📏 Height:</span>
+        <input type="range" id="heightSlider" min="200" max="800" step="10" value="480">
+        <span id="heightValue" class="badge">480px</span>
+      </div>
+      <div class="size-control">
+        <span>🎛️ Preset:</span>
+        <select id="presetSizes">
+          <option value="custom">Custom</option>
+          <option value="mobile">Mobile (360x640)</option>
+          <option value="tablet">Tablet (768x600)</option>
+          <option value="desktop">Desktop (100% x 600)</option>
+          <option value="wide">Widescreen (1100x550)</option>
+        </select>
+      </div>
+      <label style="display: inline-flex; align-items: center; gap: 6px; margin-left: auto;">
+        <input type="checkbox" id="sandboxCheckbox"> 🧪 Enable sandbox (allow-same-origin + scripts)
+      </label>
+    </div>
+  </div>
+
+  <div class="iframe-stage">
+    <div class="iframe-header">
+      <h3>
+        <span>📄 Embedded preview</span>
+        <span id="liveStatus" class="status">⚪ idle</span>
+      </h3>
+      <div style="display: flex; gap: 8px;">
+        <button id="reloadIframeBtn" style="background: transparent; border: 1px solid #cbd5e1; padding: 4px 10px;">⟳ Reload frame</button>
+      </div>
+    </div>
+    <div class="iframe-wrapper" id="iframeWrapper" style="padding: 12px; transition: all 0.1s;">
+      <iframe id="testIframe"
+              title="external website test"
+              src="https://example.com"
+              width="100%"
+              height="480"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              referrerpolicy="strict-origin-when-cross-origin"
+              loading="lazy">
+        Your browser does not support iframes.
+      </iframe>
+    </div>
+    <div class="info-note">
+      <span>💡 <strong>Testing notes:</strong></span>
+      <span>Many modern websites block iframe embedding via <code>X-Frame-Options</code> or <code>CSP</code> (e.g., Google, YouTube, Twitter).</span>
+      <span>✅ Use test-friendly URLs like <strong>example.com</strong>, <strong>httpbin.org</strong>, <strong>en.wikipedia.org</strong> or local dev servers.</span>
+    </div>
+  </div>
+
+  <div class="code-snippet">
+    📋 Current iframe HTML mockup: &lt;iframe src="<span id="currentSrcDisplay">https://example.com</span>" width="..." height="..." sandbox="..."&gt;&lt;/iframe&gt;
+  </div>
+  <footer>
+    🧪 iframe test harness • X-Frame-Options / CSP resistant test • Resize, sandbox, and inspect behavior
+  </footer>
+</div>
+
+<script>
+  (function() {
+    // DOM elements
+    const iframe = document.getElementById('testIframe');
+    const urlInput = document.getElementById('urlInput');
+    const loadBtn = document.getElementById('loadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const reloadIframeBtn = document.getElementById('reloadIframeBtn');
+    const widthSlider = document.getElementById('widthSlider');
+    const heightSlider = document.getElementById('heightSlider');
+    const widthValue = document.getElementById('widthValue');
+    const heightValue = document.getElementById('heightValue');
+    const presetSizes = document.getElementById('presetSizes');
+    const sandboxCheckbox = document.getElementById('sandboxCheckbox');
+    const liveStatus = document.getElementById('liveStatus');
+    const currentSrcDisplay = document.getElementById('currentSrcDisplay');
+    const iframeWrapper = document.getElementById('iframeWrapper');
+
+    // Helper: update status message and style
+    function setStatus(message, isError = false) {
+      liveStatus.textContent = message;
+      liveStatus.style.background = isError ? '#fee2e2' : '#e6f7e6';
+      liveStatus.style.color = isError ? '#b91c1c' : '#166534';
+      if (!isError) {
+        liveStatus.style.background = '#eef2ff';
+        liveStatus.style.color = '#075985';
+      }
+      if (message === '✅ loaded') {
+        liveStatus.style.background = '#dcfce7';
+        liveStatus.style.color = '#15803d';
+      } else if (message === '⚠️ blocked / error') {
+        liveStatus.style.background = '#ffe4e2';
+        liveStatus.style.color = '#b91c1c';
+      }
+    }
+
+    // load start state
+    function setLoading() {
+      setStatus('🔄 loading...', false);
+    }
+
+    function updateSrcDisplay() {
+      const currentSrc = iframe.getAttribute('src') || '(empty)';
+      let shortSrc = currentSrc;
+      if (currentSrc.length > 65) shortSrc = currentSrc.substring(0, 62) + '...';
+      currentSrcDisplay.textContent = shortSrc || 'about:blank';
+    }
+
+    // Apply sandbox attribute based on checkbox
+    function applySandbox() {
+      if (sandboxCheckbox.checked) {
+        // typical relaxed sandbox: allow same-origin, scripts, forms, popups, modals, etc.
+        // but still restrictive enough to show testing behavior.
+        // for testing embedding we allow essential flags: allow-same-origin allow-scripts allow-forms allow-popups allow-modals
+        iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation');
+      } else {
+        iframe.removeAttribute('sandbox');
+      }
+    }
+
+    // Update iframe width and height respecting units (width can be % or px)
+    function updateDimensions() {
+      let widthVal = widthSlider.value;
+      let heightVal = heightSlider.value;
+      
+      // width display logic: we show as % if slider at max 100? Actually slider max is 1200 but we treat 100% as special.
+      // Better: user can pick 100% via preset, but slider numeric 0-1200 represents px unless value = 100% indicator.
+      // However in our UI, width slider min 200 max 1200 step 10, but we need allow percentage.
+      // We'll extend: if widthSlider value is exactly 100 AND a special flag? Actually we designed widthSlider numbers as px, but user expect %
+      // To improve: we let widthSlider value be "percent" mode if value == 101? but simpler: We'll change logic: width can be set as "%" only through preset or manually change.
+      // But for robust testing, we adjust: widthSlider from 200 to 1200 (px) and also we provide a "100%" preset selection.
+      // So we implement width in px mostly, but allow "100%" via preset and also show widthValue accordingly.
+      // Better: width input can be either px or percentage, but we reflect both. Let's add a toggle? I will implement that user can set percentage by typing a custom %,
+      // However we offer "desktop" preset to set width 100% and keep everything consistent.
+      
+      let finalWidth;
+      const isFullWidthPreset = (presetSizes.value === 'desktop' && widthSlider.value === '1000');
+      // but we are going to manage it: we'll read a data attribute. Easier: detect if we are in '%' mode from a small flag.
+      // I'll improve: width will be either '%' or 'px' based on a variable `widthIsPercent`.
+      let widthIsPercent = false;
+      if (presetSizes.value === 'desktop') {
+        widthIsPercent = true;
+        finalWidth = '100%';
+        widthSlider.disabled = true;
+        widthValue.textContent = '100% (full)';
+      } else {
+        widthSlider.disabled = false;
+        finalWidth = widthVal + 'px';
+        widthValue.textContent = widthVal + 'px';
+        widthIsPercent = false;
+      }
+      
+      // Special handling for preset "mobile", "tablet", "wide", "custom"
+      if (presetSizes.value === 'mobile') {
+        finalWidth = '360px';
+        widthSlider.value = 360;
+        widthValue.textContent = '360px';
+        widthSlider.disabled = false;
+        heightSlider.value = 640;
+        heightValue.textContent = '640px';
+        iframe.style.width = '360px';
+        iframe.style.height = '640px';
+        iframe.setAttribute('width', '360');
+        iframe.setAttribute('height', '640');
+        updateSrcDisplay();
+        return;
+      } else if (presetSizes.value === 'tablet') {
+        finalWidth = '768px';
+        widthSlider.value = 768;
+        widthValue.textContent = '768px';
+        widthSlider.disabled = false;
+        heightSlider.value = 600;
+        heightValue.textContent = '600px';
+        iframe.style.width = '768px';
+        iframe.style.height = '600px';
+        iframe.setAttribute('width', '768');
+        iframe.setAttribute('height', '600');
+        updateSrcDisplay();
+        return;
+      } else if (presetSizes.value === 'wide') {
+        finalWidth = '1100px';
+        widthSlider.value = 1100;
+        widthValue.textContent = '1100px';
+        widthSlider.disabled = false;
+        heightSlider.value = 550;
+        heightValue.textContent = '550px';
+        iframe.style.width = '1100px';
+        iframe.style.height = '550px';
+        iframe.setAttribute('width', '1100');
+        iframe.setAttribute('height', '550');
+        updateSrcDisplay();
+        return;
+      } else if (presetSizes.value === 'desktop') {
+        // already set width 100% 
+        iframe.style.width = '100%';
+        iframe.style.height = heightSlider.value + 'px';
+        iframe.setAttribute('width', '100%');
+        iframe.setAttribute('height', heightSlider.value);
+        widthValue.textContent = '100%';
+        heightValue.textContent = heightSlider.value + 'px';
+        updateSrcDisplay();
+        return;
+      }
+      
+      // for 'custom' or others default handling
+      if (!widthIsPercent) {
+        iframe.style.width = finalWidth;
+        iframe.style.height = heightVal + 'px';
+        iframe.setAttribute('width', widthVal);
+        iframe.setAttribute('height', heightVal);
+        heightValue.textContent = heightVal + 'px';
+      } else {
+        iframe.style.width = '100%';
+        iframe.style.height = heightVal + 'px';
+      }
+    }
+    
+    // sync sliders with preset selection
+    function syncControlsFromPreset() {
+      const preset = presetSizes.value;
+      if (preset === 'mobile') {
+        widthSlider.value = 360;
+        heightSlider.value = 640;
+        widthSlider.disabled = false;
+      } else if (preset === 'tablet') {
+        widthSlider.value = 768;
+        heightSlider.value = 600;
+        widthSlider.disabled = false;
+      } else if (preset === 'wide') {
+        widthSlider.value = 1100;
+        heightSlider.value = 550;
+        widthSlider.disabled = false;
+      } else if (preset === 'desktop') {
+        widthSlider.disabled = true;
+        heightSlider.value = Math.min(700, heightSlider.value);
+        heightValue.textContent = heightSlider.value + 'px';
+      } else {
+        widthSlider.disabled = false;
+        if (widthSlider.value === '') widthSlider.value = 800;
+        if (heightSlider.value === '') heightSlider.value = 480;
+      }
+      updateDimensions();
+    }
+    
+    // load url into iframe
+    function loadIframeUrl(url) {
+      if (!url || url.trim() === '') {
+        iframe.src = 'about:blank';
+        setStatus('⚠️ empty URL', true);
+        updateSrcDisplay();
+        return;
+      }
+      let finalUrl = url.trim();
+      // add https:// prefix if no protocol (basic)
+      if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://') && !finalUrl.startsWith('//')) {
+        finalUrl = 'https://' + finalUrl;
+      }
+      setLoading();
+      // apply sandbox before loading if needed
+      applySandbox();
+      // set the src
+      iframe.src = finalUrl;
+      updateSrcDisplay();
+      
+      // detect load/error events
+      function onLoadHandler() {
+        setStatus('✅ loaded');
+        iframe.removeEventListener('load', onLoadHandler);
+        iframe.removeEventListener('error', onErrorHandler);
+      }
+      function onErrorHandler() {
+        setStatus('⚠️ blocked / error', true);
+        iframe.removeEventListener('load', onLoadHandler);
+        iframe.removeEventListener('error', onErrorHandler);
+      }
+      iframe.addEventListener('load', onLoadHandler, { once: true });
+      iframe.addEventListener('error', onErrorHandler, { once: true });
+      // fallback timeout for security errors (X-Frame)
+      setTimeout(() => {
+        if (iframe.src === finalUrl && !iframe.contentDocument && finalUrl !== 'about:blank') {
+          // many cross-origin blocked still load event fires, but sometimes we can't detect. additional heuristics: iframe not ready?
+          // we will not override status if already loaded, but if loading stuck.
+          const currentStatus = liveStatus.textContent;
+          if (currentStatus.includes('loading')) {
+            setStatus('⚠️ possible X-Frame / CSP block', true);
+          }
+        }
+      }, 4000);
+    }
+    
+    // reset to example.com
+    function resetToExample() {
+      urlInput.value = 'https://example.com';
+      loadIframeUrl('https://example.com');
+      presetSizes.value = 'custom';
+      widthSlider.disabled = false;
+      widthSlider.value = 1000;
+      heightSlider.value = 480;
+      updateDimensions();
+      sandboxCheckbox.checked = false;
+      applySandbox();
+    }
+    
+    // clear iframe (empty)
+    function clearIframe() {
+      iframe.src = 'about:blank';
+      setStatus('🗑️ cleared', false);
+      updateSrcDisplay();
+      urlInput.value = '';
+    }
+    
+    // reload current src
+    function reloadIframe() {
+      const currentSrc = iframe.src;
+      if (currentSrc && currentSrc !== 'about:blank') {
+        loadIframeUrl(currentSrc);
+      } else {
+        setStatus('nothing to reload', false);
+      }
+    }
+    
+    // event listeners
+    loadBtn.addEventListener('click', () => {
+      let rawUrl = urlInput.value;
+      if (!rawUrl.trim()) rawUrl = 'https://example.com';
+      loadIframeUrl(rawUrl);
+    });
+    resetBtn.addEventListener('click', resetToExample);
+    clearBtn.addEventListener('click', clearIframe);
+    reloadIframeBtn.addEventListener('click', reloadIframe);
+    
+    widthSlider.addEventListener('input', () => {
+      if (presetSizes.value !== 'custom' && presetSizes.value !== 'desktop') {
+        presetSizes.value = 'custom';
+      }
+      updateDimensions();
+    });
+    heightSlider.addEventListener('input', () => {
+      if (presetSizes.value !== 'custom' && presetSizes.value !== 'desktop') {
+        presetSizes.value = 'custom';
+      }
+      updateDimensions();
+    });
+    presetSizes.addEventListener('change', () => {
+      syncControlsFromPreset();
+      updateDimensions();
+    });
+    sandboxCheckbox.addEventListener('change', () => {
+      applySandbox();
+      // optional: reload to make sandbox active immediately
+      if (iframe.src && iframe.src !== 'about:blank') {
+        const current = iframe.src;
+        loadIframeUrl(current);
+      }
+    });
+    
+    // initial dimension sync
+    function init() {
+      iframe.style.width = '100%';
+      iframe.style.height = '480px';
+      widthSlider.value = 1000;
+      heightSlider.value = 480;
+      widthValue.textContent = '1000px';
+      heightValue.textContent = '480px';
+      updateDimensions();
+      applySandbox();
+      loadIframeUrl('https://example.com');
+      urlInput.value = 'https://example.com';
+    }
+    
+    init();
+  })();
+</script>
+</body>
+</html>
